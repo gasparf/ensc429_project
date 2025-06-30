@@ -1,15 +1,12 @@
-add_library(audio
-    audio/microphone.cpp
-    audio/microphone.h
-    audio/speaker.h
-    audio/speaker.cpp
-)
+cmake_minimum_required(VERSION 3.10)
 
-find_package(portaudio REQUIRED)
+# Allow CMake to find additional modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# Include directories
-target_include_directories(audio PUBLIC ${PORTAUDIO_INCLUDE_DIRS})
-target_include_directories(audio PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/audio)
+# Attempt to locate PortAudio
+find_package(PortAudio REQUIRED)
 
-# Link libraries
-target_link_libraries(audio PUBLIC ${PORTAUDIO_LIBRARIES})
+# dummy target to demonstrate linkage
+add_library(example STATIC example.c)
+
+target_link_libraries(example PRIVATE PortAudio::PortAudio)
