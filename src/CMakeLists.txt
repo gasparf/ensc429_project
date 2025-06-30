@@ -1,12 +1,15 @@
-add_library(rtos
-    rtos/task.cpp
-    rtos/scheduler.cpp
+add_library(audio
     audio/microphone.cpp
+    audio/microphone.h
+    audio/speaker.h
     audio/speaker.cpp
-    audio/audio_buffer.cpp
 )
 
-target_include_directories(rtos PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+find_package(portaudio REQUIRED)
 
-add_executable(voice_encoder main.cpp)
-target_link_libraries(voice_encoder PRIVATE rtos)
+# Include directories
+target_include_directories(audio PUBLIC ${PORTAUDIO_INCLUDE_DIRS})
+target_include_directories(audio PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/audio)
+
+# Link libraries
+target_link_libraries(audio PUBLIC ${PORTAUDIO_LIBRARIES})
