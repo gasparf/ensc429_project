@@ -1,21 +1,12 @@
-#include "audio_buffer.hpp"
+add_library(rtos
+    rtos/task.cpp
+    rtos/scheduler.cpp
+    audio/microphone.cpp
+    audio/speaker.cpp
+    audio/audio_buffer.cpp
+)
 
-namespace audio {
+target_include_directories(rtos PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-void AudioBuffer::push(const std::vector<float>& data) {
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        queue_.push(data);
-    }
-    cv_.notify_one();
-}
-
-std::vector<float> AudioBuffer::pop() {
-    std::unique_lock<std::mutex> lock(mutex_);
-    cv_.wait(lock, [this]{ return !queue_.empty(); });
-    auto data = std::move(queue_.front());
-    queue_.pop();
-    return data;
-}
-
-} // namespace audio
+add_executable(voice_encoder main.cpp)
+target_link_libraries(voice_encoder PRIVATE rtos)

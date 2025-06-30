@@ -2,11 +2,15 @@
 #include "audio/microphone.hpp"
 #include "audio/speaker.hpp"
 #include "audio/audio_buffer.hpp"
-
 #include <vector>
 #include <thread>
 #include <chrono>
 #include <iostream>
+
+void processFrame(std::vector<float>& frame) {
+    // Placeholder for DSP algorithms. Effects like vocoding, filtering
+    // or compression will be applied to each frame here.
+}
 
 int main() {
     constexpr size_t frameSize = 512;
@@ -24,6 +28,7 @@ int main() {
     sched.addTask([&]() {
         std::vector<float> frame(frameSize);
         if (mic.capture(frame)) {
+            processFrame(frame);
             buffer.push(frame);
         }
     });
