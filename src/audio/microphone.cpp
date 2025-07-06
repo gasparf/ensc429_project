@@ -1,4 +1,4 @@
-#include "microphone.h"
+#include "microphone.hpp"
 
 namespace audio {
 

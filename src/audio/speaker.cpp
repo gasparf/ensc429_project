@@ -1,4 +1,4 @@
-#include "speaker.h"
+#include "speaker.hpp"
 
 namespace audio {
 
