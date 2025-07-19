@@ -1,3 +1,15 @@
+/*
+// ENSC 429 Project - Real-Time Vocoder
+//
+// This project implements a real-time vocoder using PortAudio for audio input/output
+// and a custom DSP processing chain for audio effects.
+//
+// File     : task.cpp
+// Date     : 2025-07-18
+// Authors  :
+//      Keon Kye       301475751
+*/
+
 #include "task.hpp"
 #include <chrono>
 
