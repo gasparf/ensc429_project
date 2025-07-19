@@ -2,6 +2,8 @@
 #include <csignal>
 #include "audio/microphone.hpp"
 #include "audio/speaker.hpp"
+/*New add DSP header*/
+#include "dsp/dsp.h"
 
 using namespace audio;
 
@@ -40,13 +42,22 @@ int main() {
         mic.close();
         return 1;
     }
-
+    /* Add-Establish DSP objects and adjust parameters. */
+    HeavenDSP dsp(sampleRate);              // Maximum 1.5 s buffer
+    dsp.setMode(DSPMode::HeavenEcho);
+    dsp.setWetDry(0.3f);                    // 60% wet sound
+    dsp.setFeedback(0.2f);                 // Echo tailing
+    dsp.setTaps({ 300, 600});           // 2 echo taps (ms unit)
+    /*End added*/
     std::cout << "Real-time audio loop started. Press Ctrl+C to stop." << std::endl;
     
     try {
         while (running) {
             auto buffer = mic.capture(framesPerBuffer);
             if (!buffer.empty()) {
+                /* Add-DSP processing before playing */
+                dsp.process(buffer.data(), static_cast<int>(buffer.size()));
+                /*End added*/
                 speaker.play(buffer);
             }
         }

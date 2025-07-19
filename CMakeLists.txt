@@ -9,10 +9,13 @@ set(SOURCES
     src/audio/microphone.cpp
     src/audio/speaker.cpp
     src/main.cpp
-)
+    dsp/dsp.cpp)# NEW add!
 
 # Gather your sources (better to list files explicitly)
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+#This second line covers the variable SOURCES with the same name ¡ý¡ý¡ý
+
+#file(GLOB_RECURSE SOURCES "src/*.cpp")
+
 
 # Create executable
 add_executable(voice_encoder ${SOURCES})
@@ -21,6 +24,8 @@ add_executable(voice_encoder ${SOURCES})
 target_link_libraries(voice_encoder PRIVATE portaudio_static)
 
 target_include_directories(voice_encoder PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}  
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/audio  # Explicitly add audio directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/dsp # NEW!
 )
