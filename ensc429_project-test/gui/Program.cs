@@ -63,10 +63,12 @@ namespace VoiceEncoderGui
 
             startButton.Click += StartClicked;
             stopButton.Click += StopClicked;
+            
             gainSlider.ValueChanged += GainSliderChanged;
 
             Controls.Add(startButton);
             Controls.Add(stopButton);
+            // Add gain control elements
             Controls.Add(gainLabel);
             Controls.Add(gainSlider);
             Controls.Add(logBox);

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VoiceEncoderGui")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+20821b1ba908da5a22c91ffb9fe04a66a064694a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c98bc171decd6fbf26c8c13345375bbf9c756a9f")]
 [assembly: System.Reflection.AssemblyProductAttribute("VoiceEncoderGui")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VoiceEncoderGui")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
