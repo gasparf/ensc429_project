@@ -21,8 +21,15 @@
 #include <iomanip>
 #include <string>
 #include <memory>
+#include <algorithm>
 
 using namespace audio;
+
+// Helper function for clamping values (C++11 compatible)
+template<typename T>
+T clamp(T value, T min, T max) {
+    return std::max(min, std::min(value, max));
+}
 
 bool running = true;
 
@@ -58,9 +65,23 @@ void printFooter() {
     std::cout << border << std::endl;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    // Parse command line arguments for gain control
+    float gainValue = 0.8f; // default gain
+    
+    if (argc > 1) {
+        try {
+            gainValue = std::stof(argv[1]);
+            // Clamp gain between 0.0 and 2.0 for safety
+            gainValue = clamp(gainValue, 0.0f, 2.0f);
+        } catch (const std::exception& e) {
+            std::cerr << "Invalid gain value. Using default 0.8" << std::endl;
+            gainValue = 0.8f;
+        }
+    }
 
     printHeader();
+    std::cout << "\nGain Control: " << std::fixed << std::setprecision(2) << gainValue << std::endl;
     std::cout << "\nInitializing PortAudio..." << std::endl;
 
     PaError err = Pa_Initialize();
@@ -81,9 +102,8 @@ int main() {
     dsp::DSPProcessor dspProcessor;
     dspProcessor.initialize(sampleRate, channels, framesPerBuffer);
     
-    // gain effect (volume control)
-    // testing...
-    dspProcessor.addEffect(std::make_unique<dsp::GainEffect>(0.8f)); // volume 80%
+    // gain effect (volume control) - using command line parameter
+    dspProcessor.addEffect(std::make_unique<dsp::GainEffect>(gainValue));
 
 
     // ===============================================================================================================
@@ -107,8 +127,8 @@ int main() {
     // 2) Create a processing chain that only does gain and fir filtering.
     dsp::DSPProcessor dspFilter;
     dspFilter.initialize(sampleRate, channels, framesPerBuffer);
-    // Optional: Move the gain here.
-    dspFilter.addEffect(std::make_unique<dsp::GainEffect>(0.8f));
+    // Optional: Move the gain here - using command line parameter
+    dspFilter.addEffect(std::make_unique<dsp::GainEffect>(gainValue));
     dspFilter.addEffect(std::make_unique<dsp::FIRFilter>(dsp::DESIGNED_FIR_FILTER_COEFFICIENTS));
 
     std::cout << "Vocoder Modulator initialized with 2 effects." << std::endl;
@@ -147,7 +167,7 @@ int main() {
             auto raw = mic.capture(framesPerBuffer);
             if (raw.empty()) continue;
 
-            // 1) Envelope ¡ú modulation
+            // 1) Envelope ï¿½ï¿½ modulation
             auto modulated = dspModulator.process(raw);
 
             // 2) Original sound+modulation sound mixing
