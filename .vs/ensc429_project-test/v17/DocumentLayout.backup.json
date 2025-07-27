@@ -3,10 +3,6 @@
   "WorkspaceRootPath": "C:\\Users\\eamon\\Desktop\\ensc429_project-test\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\eamon\\Desktop\\ensc429_project-test\\ensc429_project-test\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ensc429_project-test\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\eamon\\Desktop\\ensc429_project-test\\ensc429_project-test\\src\\dsp\\dsp.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ensc429_project-test\\src\\dsp\\dsp.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
@@ -15,11 +11,12 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ensc429_project-test\\src\\dsp\\BANDPASS_coeff.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\eamon\\Desktop\\ensc429_project-test\\ensc429_project-test\\src\\dsp\\dsp.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ensc429_project-test\\src\\dsp\\dsp.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\eamon\\Desktop\\ensc429_project-test\\ensc429_project-test\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ensc429_project-test\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\VS community 2022\\VC\\Tools\\MSVC\\14.44.35207\\include\\memory||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\eamon\\Desktop\\ensc429_project-test\\ensc429_project-test\\src\\dsp\\dsp.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ensc429_project-test\\src\\dsp\\dsp.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|CMake Overview Pages||{B1CAA5B0-FEB1-4350-8AB9-F895876842F2}"
@@ -32,41 +29,29 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "BANDPASS_coeff.cpp",
               "DocumentMoniker": "C:\\Users\\eamon\\Desktop\\ensc429_project-test\\ensc429_project-test\\src\\dsp\\BANDPASS_coeff.cpp",
               "RelativeDocumentMoniker": "ensc429_project-test\\src\\dsp\\BANDPASS_coeff.cpp",
               "ToolTip": "C:\\Users\\eamon\\Desktop\\ensc429_project-test\\ensc429_project-test\\src\\dsp\\BANDPASS_coeff.cpp",
               "RelativeToolTip": "ensc429_project-test\\src\\dsp\\BANDPASS_coeff.cpp",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAABMAAAAvAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-07-21T07:26:08.658Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-21T07:26:08.658Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "memory",
-              "DocumentMoniker": "D:\\VS community 2022\\VC\\Tools\\MSVC\\14.44.35207\\include\\memory",
-              "ToolTip": "D:\\VS community 2022\\VC\\Tools\\MSVC\\14.44.35207\\include\\memory",
-              "ViewState": "AgIAADQNAAAAAAAAAIAwwEENAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-07-21T07:15:34.462Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "dsp.cpp",
               "DocumentMoniker": "C:\\Users\\eamon\\Desktop\\ensc429_project-test\\ensc429_project-test\\src\\dsp\\dsp.cpp",
               "RelativeDocumentMoniker": "ensc429_project-test\\src\\dsp\\dsp.cpp",
               "ToolTip": "C:\\Users\\eamon\\Desktop\\ensc429_project-test\\ensc429_project-test\\src\\dsp\\dsp.cpp",
               "RelativeToolTip": "ensc429_project-test\\src\\dsp\\dsp.cpp",
-              "ViewState": "AgIAAE4AAAAAAAAAAAAAAN4AAAAvAAAAAAAAAA==",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAANUAAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-07-21T06:17:32.668Z",
               "EditorCaption": ""
@@ -79,33 +64,30 @@
               "RelativeDocumentMoniker": "ensc429_project-test\\src\\dsp\\dsp.hpp",
               "ToolTip": "C:\\Users\\eamon\\Desktop\\ensc429_project-test\\ensc429_project-test\\src\\dsp\\dsp.hpp",
               "RelativeToolTip": "ensc429_project-test\\src\\dsp\\dsp.hpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAA+AAAAAAAAAA==",
+              "ViewState": "AgIAAJkAAAAAAAAAAAAAABUAAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-07-21T01:39:19.569Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-21T01:39:19.569Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "main.cpp",
               "DocumentMoniker": "C:\\Users\\eamon\\Desktop\\ensc429_project-test\\ensc429_project-test\\src\\main.cpp",
               "RelativeDocumentMoniker": "ensc429_project-test\\src\\main.cpp",
               "ToolTip": "C:\\Users\\eamon\\Desktop\\ensc429_project-test\\ensc429_project-test\\src\\main.cpp",
               "RelativeToolTip": "ensc429_project-test\\src\\main.cpp",
-              "ViewState": "AgIAAIgAAAAAAAAAAAAmwKEAAAATAAAAAAAAAA==",
+              "ViewState": "AgIAAF0AAAAAAAAAAAAAAHMAAABCAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-07-21T01:21:18.446Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-21T01:21:18.446Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 4,
               "Title": "CMake Overview Pages",
               "DocumentMoniker": "CMake Overview Pages",
               "ToolTip": "CMake Overview Pages",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-07-21T01:20:55.788Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-21T01:20:55.788Z"
             }
           ]
         }

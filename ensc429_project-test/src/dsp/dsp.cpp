@@ -1,4 +1,4 @@
-/*
+﻿/*
 // ENSC 429 Project - Real-Time Vocoder
 //
 // This project implements a real-time vocoder using PortAudio for audio input/output
@@ -165,62 +165,87 @@ void FIRFilter::initialize(int sampleRate, int channels, int framesPerBuffer) {
     // Clear delay line on initialization
     clearDelayLine();
 }
-
-    // Realization of EnvelopeDetector
+    //-----------------------------------------
+    // YY Realization of EnvelopeDetector
+    //-----------------------------------------
     EnvelopeDetector::EnvelopeDetector(float attackTimeSec, float releaseTimeSec)
-        : attackTimeSec_(attackTimeSec)
-        , releaseTimeSec_(releaseTimeSec)
-        , attackCoeff_(0.0f)
-        , releaseCoeff_(0.0f)
+        : attackTimeSec_(attackTimeSec)// store how fast to follow rising amplitude
+        , releaseTimeSec_(releaseTimeSec)// store how fast to follow falling amplitude
+        , attackCoeff_(0.0f) // will hold per-sample attack multiplier
+        , releaseCoeff_(0.0f) // will hold per-sample release multiplier
     {
+        // constructor body is empty: we only store parameters here
     }
 
     void EnvelopeDetector::initialize(int sampleRate, int channels, int /*framesPerBuffer*/) {
+        // compute multiplier so that attackTimeSec_ seconds corresponds to ~63% change
         attackCoeff_ = std::exp(-1.0f / (attackTimeSec_ * sampleRate));
+        // same for release time
         releaseCoeff_ = std::exp(-1.0f / (releaseTimeSec_ * sampleRate));
+        // reset envelope state for each channel to zero
         envState_.assign(channels, 0.0f);
     }
 
     std::vector<float> EnvelopeDetector::process(const std::vector<float>& input, int /*sampleRate*/) {
+        // prepare output buffer same size as input
         std::vector<float> output(input.size());
+        // number of channels stored
         int chCount = static_cast<int>(envState_.size());
+
+        // process every sample in the block
         for (size_t i = 0; i < input.size(); ++i) {
+            // take absolute value to get amplitude
             float inAbs = std::fabs(input[i]);
+            // pick which channel state to update (interleaved data)
             float& state = envState_[i % chCount];
-            if (inAbs > state)
+
+            if (inAbs > state) {
+                // rising edge: use faster attackCoeff_ to track up
                 state = attackCoeff_ * (state - inAbs) + inAbs;
-            else
+            }
+            else {
+                // output current envelope value
                 state = releaseCoeff_ * (state - inAbs) + inAbs;
+            }
             output[i] = state;
         }
         return output;
     }
 
-    //
-    // EnvelopeModulator
-    //
+    //---------------------------
+    // YY EnvelopeModulator
+    //---------------------------
 
     EnvelopeModulator::EnvelopeModulator(float carrierFreqHz, float depth)
-        : carrierFreqHz_(carrierFreqHz)
-        , depth_(depth)
-        , carrierPhase_(0.0f)
-        , phaseIncrement_(0.0f)
-        , channels_(1)
+        : carrierFreqHz_(carrierFreqHz)// store carrier sine frequency
+        , depth_(depth) // store how strong the modulation is
+        , carrierPhase_(0.0f) // start phase at zero
+        , phaseIncrement_(0.0f) // will compute per-sample phase step
+        , channels_(1)// default to 1 channel until initialize()
     {
+        // constructor does not compute anything heavy
     }
 
     void EnvelopeModulator::initialize(int sampleRate, int channels, int /*framesPerBuffer*/) {
-        channels_ = channels;
+        channels_ = channels;// save channel count
+        // compute how much to advance the sine phase each sample
         phaseIncrement_ = 2.0f * PI * carrierFreqHz_ / sampleRate;
-        carrierPhase_ = 0.0f;
+        carrierPhase_ = 0.0f; // reset phase
     }
 
     std::vector<float> EnvelopeModulator::process(const std::vector<float>& input, int /*sampleRate*/) {
+        // output buffer same size as input
         std::vector<float> output(input.size());
+        
+        // process every sample
         for (size_t i = 0; i < input.size(); ++i) {
-            float env = input[i];
-            float carrier = std::sin(carrierPhase_);
+            float env = input[i];// read envelope from detector
+            float carrier = std::sin(carrierPhase_);// generate one sine sample
+            
+            // multiply envelope by sine, scaled by depth_
             output[i] = depth_ * env * carrier;
+
+            // advance sine phase, wrap at 2π
             carrierPhase_ += phaseIncrement_;
             if (carrierPhase_ >= 2.0f * PI)
                 carrierPhase_ -= 2.0f * PI;
@@ -228,13 +253,34 @@ void FIRFilter::initialize(int sampleRate, int channels, int framesPerBuffer) {
         return output;
     }
 
-    // initialize()
+//---------------------------
+// YY VocoderEffect
+//---------------------------
+/*--------------------------------------------------------------------------------------
+/YY
+/   1. Constructor only stores configuration; real setup happens in initialize().
+/   2. initialize() loops over each band to:  
+/       a) Make a bandpass filter with your FIR coefficients.
+/       b)Create an envelope detector for that band.
+/       c)Choose a sinewave carrier frequency.
+/       d)Create an envelope modulator.
+/       e)Call each object’s initialize() so they know the sample rate and channels.
+/   3. process() for each audio block: 
+/       a)Run the block through the band filter.
+/       b)Extract its envelope.
+/       c)Modulate that envelope onto the carrier.
+/       d)Add each band’s output into one final mix. 
+/--------------------------------------------------------------------------------------*/
+
+    // Constructor: store how many bands you want and the envelope times
     VocoderEffect::VocoderEffect(int numBands, float attack, float release)
-        : numBands_(numBands), attackTime_(attack), releaseTime_(release)
+        : numBands_(numBands)// number of frequency bands to process
+        , attackTime_(attack)// how fast envelopes react to rising signal
+        , releaseTime_(release)// how fast envelopes react to falling signal
     {
     }
 
-    // 
+    // // initialize(): set up all your band filters, detectors, and modulators
     void VocoderEffect::initialize(int sampleRate, int channels, int framesPerBuffer) {
         bandFilters_.clear();
         detectors_.clear();
@@ -243,33 +289,50 @@ void FIRFilter::initialize(int sampleRate, int channels, int framesPerBuffer) {
         // bandsCoeffs[i]
         extern const std::vector<std::vector<double>> BANDPASS_COEFFS;
 
+        // for each band index b = 0…numBands_-1
         for (int b = 0; b < numBands_; ++b) {
+            // 1) create a FIR band‑pass filter using your precomputed coeffs
             bandFilters_.emplace_back(BANDPASS_COEFFS[b]);
+            
+            // 2) create an envelope detector for this band
             detectors_.emplace_back(attackTime_, releaseTime_);
+           
+            // 3) pick a carrier frequency for this band
+            //    we spread carriers logarithmically between 300 Hz and 3400 Hz
             float centerFreq = 300.0f * std::pow((3400.0f / 300.0f), b / float(numBands_ - 1));
+            
+            // 4) create an envelope modulator with that carrier
             modulators_.emplace_back(centerFreq, /*depth=*/1.0f);
 
-            // initialize
+            // 5) initialize each new object with sample rate & channel count
             bandFilters_.back().initialize(sampleRate, channels, framesPerBuffer);
             detectors_.back().initialize(sampleRate, channels, framesPerBuffer);
             modulators_.back().initialize(sampleRate, channels, framesPerBuffer);
         }
     }
 
+    //  process(): run one block of audio through all bands and mix them
     std::vector<float> VocoderEffect::process(const std::vector<float>& input, int sampleRate) {
 
+        // prepare a mix buffer the same size as input, filled with zeros
         std::vector<float> mix(input.size(), 0.0f), temp;
 
+        // for each band:
         for (int b = 0; b < numBands_; ++b) {
+            // a) filter the input into this band
             temp = bandFilters_[b].process(input, sampleRate);
+            // b) extract the amplitude envelope of that band
             temp = detectors_[b].process(temp, sampleRate);
+            // c) modulate a carrier by that envelope
             temp = modulators_[b].process(temp, sampleRate);
+            // d) add this band’s result into the final mix
             for (size_t i = 0; i < mix.size(); ++i)
                 mix[i] += temp[i];
         }
 
         return mix;
-    }
+    }//End VocoderEffect
+
 // DSPProcessor Implementation
 
 DSPProcessor::DSPProcessor() : sampleRate(44100), channels(1), framesPerBuffer(512), bypass(false) {}

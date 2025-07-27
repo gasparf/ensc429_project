@@ -1,4 +1,4 @@
-/*
+﻿/*
 // ENSC 429 Project - Real-Time Vocoder
 //
 // This project implements a real-time vocoder using PortAudio for audio input/output
@@ -15,10 +15,10 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include <cmath>// New added by YY
+#include <cmath>// YY
 
 namespace dsp {
-constexpr float PI = 3.14159265358979323846;
+constexpr float PI = 3.14159265358979323846;//YY updated: user-defined π constant, replacing M_PI.
 extern const std::vector<std::vector<double>> BANDPASS_COEFFS;
 
 // Forward declaration for the designed coefficients
@@ -122,43 +122,77 @@ public:
 // ------------------------------
 // Envelope Detector
 // ------------------------------
+
+/* -------------------------------------------------------------------------------------------------------------------------------------
+/   YY
+/   Why these fields?
+/   1. attackTimeSec_ & releaseTimeSec_ let you tweak how fast the detector tracks changes.
+/   2. The “coeff” values (attackCoeff_, releaseCoeff_) turn those times into persample multipliers (exp(–1/(τ·fs))).
+/   3. envState_ holds the running envelope for each channel and lets us reference “previous” amplitude every time we process a new sample.
+/-----------------------------------------------------------------------------------------------------------------------------------------*/
+
 class EnvelopeDetector : public DSPEffect {
 public:
-    // attackTimeSec��Sound Rise Detection Speed (sec)
-    // releaseTimeSec��Sound drop detection speed (seconds)
-    EnvelopeDetector(float attackTimeSec = 0.01f, float releaseTimeSec = 0.1f);
-
-    void initialize(int sampleRate, int channels, int framesPerBuffer) override;
+    /* YY Constructor: you pass in two times (in seconds)
+     attackTimeSec:   how quickly the detector follows rising amplitude  
+     releaseTimeSec:  how quickly it “lets go” when amplitude falls */
+    EnvelopeDetector(float attackTimeSec = 0.01f, 
+                     float releaseTimeSec = 0.1f);
+    /* YY Called once at start (or when sample rate / channel count changes)
+     sampleRate:      samples per second, e.g. 44100  
+     channels:        number of audio channels (1 = mono, 2 = stereo)  
+     framesPerBuffer: how many samples you’ll process per callback */
+    void initialize(int sampleRate, 
+                    int channels, 
+                    int framesPerBuffer) override;
+    /* YY Called on each block of audio:
+     input:           a flat array of floats, interleaved per channel  
+     sampleRate:      same as above
+     Returns another array of the same size: the instantaneous envelope */
     std::vector<float> process(const std::vector<float>& input, int sampleRate) override;
 
 private:
-    float attackTimeSec_;
-    float releaseTimeSec_;
-    float attackCoeff_;
-    float releaseCoeff_;
-    std::vector<float> envState_;  // �� Will be allocated according to the size of the channels passed in initialize.
+    float attackTimeSec_;// stores the “attack” time you passed in
+    float releaseTimeSec_;// stores the “release” time you passed in
+    float attackCoeff_;// computed from attackTimeSec & sampleRate
+    float releaseCoeff_;// computed from releaseTimeSec & sampleRate
+    std::vector<float> envState_;  /*  One “state” per channel: keeps the last envelope value so
+                                     that we can smooth rise/fall over time, separately on each channel. */
 };
 
 // ------------------------------
 // Envelope Modulator
 // ------------------------------
+
+/* ------------------------------------------------------------------
+/    YY
+/    What happens in process()?
+/    1. Read the envelope value (input[i]).
+/    2. Compute one sine sample at carrierPhase_.
+/    3. Multiply: output = depth_ * envelope * carrier.
+/    4. Advance carrierPhase_ by phaseIncrement_, wrapping every 2π.
+/---------------------------------------------------------------------*/
 class EnvelopeModulator : public DSPEffect {
 public:
-    // carrierFreqHz��(Hz)��depth��[0,1]
+    /*  Constructor : pick a carrier frequency(Hz) and depth[0…1]
+     carrierFreqHz:   the sine‑wave you’ll use to modulate  
+     depth:           how strongly the envelope affects the carrier */
+    //  carrierFreqHz：(Hz)，depth：[0,1]
     EnvelopeModulator(float carrierFreqHz = 440.0f, float depth = 1.0f);
-
+    //  Called once at start (or when sample rate / channel count changes)
     void initialize(int sampleRate, int channels, int framesPerBuffer) override;
+    //  Called each audio block
     std::vector<float> process(const std::vector<float>& input, int sampleRate) override;
 
 private:
-    float carrierFreqHz_;
-    float carrierPhase_;
-    float phaseIncrement_;
-    float depth_;
-    int   channels_;  // �� How many channels are recorded
+    float carrierFreqHz_;//  stores the carrier frequency you passed in
+    float carrierPhase_;//  current angle of the sine wave, in radians
+    float phaseIncrement_;//  equals 2π·carrierFreqHz_/sampleRate
+    float depth_;//  how much envelope modulates the carrier
+    int   channels_;  // ← How many channels are recorded
 };
 
-/// 8-band speech coder
+// YY OPTIONAL: 8-band speech coder(Example)
 class VocoderEffect : public DSPEffect {
 public:
     VocoderEffect(int numBands = 8, float attack = 0.01f, float release = 0.1f);
@@ -172,7 +206,7 @@ private:
     std::vector<FIRFilter>         bandFilters_;
     std::vector<EnvelopeDetector>  detectors_;
     std::vector<EnvelopeModulator> modulators_;
-};
+};//End example
 
 class DSPProcessor {
 private:

@@ -66,7 +66,7 @@ void printFooter() {
 }
 
 int main(int argc, char* argv[]) {
-    // Parse command line arguments for gain control
+    // YY allow gain override via command line
     float gainValue = 0.8f; // default gain
     
     if (argc > 1) {
@@ -94,9 +94,10 @@ int main(int argc, char* argv[]) {
 
     std::signal(SIGINT, signal_handler);
     
+    // common audio settings
     const int sampleRate = 44100;
-    const int channels = 1;
-    const int framesPerBuffer = 512;
+    const int channels = 1; // mono input/output
+    const int framesPerBuffer = 512;// ~11.6 ms blocks
 
     // init DSP processor
     dsp::DSPProcessor dspProcessor;
@@ -115,25 +116,46 @@ int main(int argc, char* argv[]) {
     // The filter will automatically use the coefficients you put in FIR_coeff.cpp
     auto firFilter = std::make_unique<dsp::FIRFilter>(dsp::DESIGNED_FIR_FILTER_COEFFICIENTS);
     // ===============================================================================================================
-    // DONE. TODO = Envelop detector
-    // DONE. TODO = Envelop Modulator
-    // together
-    // 1) Create a processing chain that only does envelope detection and modulation.
+    
+    /* DONE.TODO = Envelop detector
+       DONE. TODO = Envelop Modulator*/
+
+    /* ———————————————————————————————————————————————————————
+    / YY
+    / ORIGINAL: You had one DSPProcessor for all effects.
+    / dsp::DSPProcessor dspProcessor;
+    / dspProcessor.initialize(...);
+    / dspProcessor.addEffect(GainEffect);
+    / dspProcessor.addEffect(FIRFilter);
+    / dspProcessor.addEffect(EnvelopeDetector);
+    / dspProcessor.addEffect(EnvelopeModulator);
+    / dspProcessor.addEffect(SumEffect);
+    / ———————————————————————————————————————————————————————*/
+
+    // YY UPDATED: Split into two chains for clarity:
+  
+    // YY 1) dspModulator: just envelope detection + modulation
+    // YY Create a processing chain that only does envelope detection and modulation.
     dsp::DSPProcessor dspModulator;
     dspModulator.initialize(sampleRate, channels, framesPerBuffer);
-    dspModulator.addEffect(std::make_unique<dsp::EnvelopeDetector>(0.005f, 0.1f));
-    dspModulator.addEffect(std::make_unique<dsp::EnvelopeModulator>(440.0f, 0.8f));
+    dspModulator.addEffect(
+        std::make_unique<dsp::EnvelopeDetector>(0.005f, 0.1f));
+    dspModulator.addEffect(
+        std::make_unique<dsp::EnvelopeModulator>(440.0f, 0.8f));
 
-    // 2) Create a processing chain that only does gain and fir filtering.
+    // YY 2) dspFilter: gain + FIR filtering
+    // YY Create a processing chain that only does gain and fir filtering.
     dsp::DSPProcessor dspFilter;
     dspFilter.initialize(sampleRate, channels, framesPerBuffer);
     // Optional: Move the gain here - using command line parameter
-    dspFilter.addEffect(std::make_unique<dsp::GainEffect>(gainValue));
-    dspFilter.addEffect(std::make_unique<dsp::FIRFilter>(dsp::DESIGNED_FIR_FILTER_COEFFICIENTS));
+    dspFilter.addEffect(
+        std::make_unique<dsp::GainEffect>(gainValue));
+    dspFilter.addEffect(
+        std::make_unique<dsp::FIRFilter>(dsp::DESIGNED_FIR_FILTER_COEFFICIENTS));
 
     std::cout << "Vocoder Modulator initialized with 2 effects." << std::endl;
     std::cout << "Filter Processor initialized with "
-        << dspFilter.getEffectCount() << " effects." << std::endl;
+        << dspFilter.getEffectCount() << " effects." << std::endl;//END YY
    
     //  TODO = Sum
 
@@ -161,30 +183,31 @@ int main(int argc, char* argv[]) {
 
     std::cout << "\n\nRT Vocoder is looping. Press Ctrl+C to terminate...\n" << std::endl;
     
+    // YY UPDATED: main processing loop
     try {
         while (running) {
-            // Original sampling
+            // 1) capture raw audio
             auto raw = mic.capture(framesPerBuffer);
             if (raw.empty()) continue;
 
-            // 1) Envelope �� modulation
+            // 2) envelope → modulation
             auto modulated = dspModulator.process(raw);
 
-            // 2) Original sound+modulation sound mixing
+            // 3) mix original + modulated
             std::vector<float> mixed(raw.size());
             for (size_t i = 0; i < raw.size(); ++i) {
                 mixed[i] = raw[i] + modulated[i];
             }
 
-            // 3) Post-processing (gain+FIR filtering)
+            // 4) post‑processing: gain + FIR
             auto finalOut = dspFilter.process(mixed);
 
-            // play
+            // 5) play to speaker
             speaker.play(finalOut);
         }
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
-    }
+    } // END YY
 
     std::cout << "\nShutting down...\n" << std::endl;
     mic.close();
