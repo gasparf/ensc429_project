@@ -16,6 +16,8 @@
 #include <memory>
 #include <string>
 #include <cmath>// YY
+#include <random>
+#include "effect.hpp"
 
 namespace dsp {
 constexpr float PI = 3.14159265358979323846;//YY updated: user-defined π constant, replacing M_PI.
@@ -36,7 +38,20 @@ public:
     virtual void initialize(int sampleRate, int channels, int framesPerBuffer) = 0;
 };
 
+// ---- wgn ----
+class NoiseModulator : public DSPEffect {
+public:
+    NoiseModulator(float depth = 1.0f);
+    void initialize(int sampleRate, int channels, int framesPerBuffer) override;
+    std::vector<float> process(const std::vector<float>& env, int sampleRate) override;
+private:
+    float depth_;
+    std::mt19937 rng_;
+    std::normal_distribution<float> dist_;
+};
 
+
+// ------------------- GainEffect -------------------------
 class GainEffect : public DSPEffect {
 private:
     float gain;
@@ -46,8 +61,9 @@ public:
     void setGain(float newGain);
     float getGain() const;
     
-    std::vector<float> process(const std::vector<float>& input, int sampleRate) override;
+    // DSPEffect 
     void initialize(int sampleRate, int channels, int framesPerBuffer) override;
+    std::vector<float> process(const std::vector<float>& in, int sampleRate) override;
 };
 
 
@@ -220,6 +236,12 @@ public:
     DSPProcessor();
     ~DSPProcessor() = default;
 
+    // === Keep move only, disable copy.(Because there was a bug about this, so keep it here for safe) ===
+    DSPProcessor(const DSPProcessor&) = delete;
+    DSPProcessor& operator=(const DSPProcessor&) = delete;
+    DSPProcessor(DSPProcessor&&) noexcept = default;
+    DSPProcessor& operator=(DSPProcessor&&) noexcept = default;
+    // ---------------------------------
     void initialize(int sampleRate, int channels, int framesPerBuffer);
     void addEffect(std::unique_ptr<DSPEffect> effect);
     void clearEffects();

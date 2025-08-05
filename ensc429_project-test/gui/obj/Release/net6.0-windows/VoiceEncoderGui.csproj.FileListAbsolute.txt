@@ -1,0 +1,15 @@
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\bin\Release\net6.0-windows\VoiceEncoderGui.exe
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\bin\Release\net6.0-windows\VoiceEncoderGui.deps.json
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\bin\Release\net6.0-windows\VoiceEncoderGui.runtimeconfig.json
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\bin\Release\net6.0-windows\VoiceEncoderGui.dll
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\bin\Release\net6.0-windows\VoiceEncoderGui.pdb
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\obj\Release\net6.0-windows\VoiceEncoderGui.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\obj\Release\net6.0-windows\VoiceEncoderGui.AssemblyInfoInputs.cache
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\obj\Release\net6.0-windows\VoiceEncoderGui.AssemblyInfo.cs
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\obj\Release\net6.0-windows\VoiceEncoderGui.csproj.CoreCompileInputs.cache
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\obj\Release\net6.0-windows\VoiceEncoderGui.sourcelink.json
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\obj\Release\net6.0-windows\VoiceEncoderGui.dll
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\obj\Release\net6.0-windows\refint\VoiceEncoderGui.dll
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\obj\Release\net6.0-windows\VoiceEncoderGui.pdb
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\obj\Release\net6.0-windows\VoiceEncoderGui.genruntimeconfig.cache
+C:\Users\eamon\Desktop\ensc429_project-test\ensc429_project-test\gui\obj\Release\net6.0-windows\ref\VoiceEncoderGui.dll

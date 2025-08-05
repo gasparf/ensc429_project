@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VoiceEncoderGui")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9731fd5a8d280948a83c4b6f60873f23730743e4")]
 [assembly: System.Reflection.AssemblyProductAttribute("VoiceEncoderGui")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VoiceEncoderGui")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

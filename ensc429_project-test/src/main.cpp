@@ -17,13 +17,22 @@
 #include "audio/speaker.hpp"
 #include <portaudio.h>
 #include "dsp/dsp.hpp"
-#include "dsp/FIR_coeff.hpp"
+//#include "dsp/FIR_coeff.hpp"
+#include <vector> 
 #include <iomanip>
 #include <string>
 #include <memory>
 #include <algorithm>
+//#include <utility>
+//#include "dsp/BANDPASS_coeff.hpp"
+#include "dsp/FIRDesign.hpp"
 
 using namespace audio;
+// ---------- Global audio parameters ----------
+const int sampleRate = 44100;
+const int channels = 1;
+const int framesPerBuffer = 1024;
+// ----------------------------------
 
 // Helper function for clamping values (C++11 compatible)
 template<typename T>
@@ -56,6 +65,12 @@ void printHeader() {\
     std::cout << border << std::endl;
 }
 
+void banner() {
+    std::cout << "\n=========================================================\n"
+        << "                    ENSC 429  Real-Time Vocoder\n"
+        << "=========================================================\n";
+}
+
 void printFooter() {
     printEnter();
     const int width = 57; 
@@ -66,107 +81,14 @@ void printFooter() {
 }
 
 int main(int argc, char* argv[]) {
-    // YY allow gain override via command line
-    float gainValue = 0.8f; // default gain
-    
-    if (argc > 1) {
-        try {
-            gainValue = std::stof(argv[1]);
-            // Clamp gain between 0.0 and 2.0 for safety
-            gainValue = clamp(gainValue, 0.0f, 2.0f);
-        } catch (const std::exception& e) {
-            std::cerr << "Invalid gain value. Using default 0.8" << std::endl;
-            gainValue = 0.8f;
-        }
-    }
 
-    printHeader();
-    std::cout << "\nGain Control: " << std::fixed << std::setprecision(2) << gainValue << std::endl;
-    std::cout << "\nInitializing PortAudio..." << std::endl;
-
-    PaError err = Pa_Initialize();
-    if(err != paNoError) {
-        std::cerr << "\nPortAudio init failed: " << Pa_GetErrorText(err) << std::endl;
-        return 1;
-    }
-
-    std::cout << "\nPortAudio Initialized Successfully!\n" << std::endl;
-
+    banner();
     std::signal(SIGINT, signal_handler);
-    
-    // common audio settings
-    const int sampleRate = 44100;
-    const int channels = 1; // mono input/output
-    const int framesPerBuffer = 512;// ~11.6 ms blocks
 
-    // init DSP processor
-    dsp::DSPProcessor dspProcessor;
-    dspProcessor.initialize(sampleRate, channels, framesPerBuffer);
-    
-    // gain effect (volume control) - using command line parameter
-    dspProcessor.addEffect(std::make_unique<dsp::GainEffect>(gainValue));
-
-
-    // ===============================================================================================================
-
-    // VOCODER LOGIC
-    // BPF -> Envelop detector (per pand) -> Envelop Modulator (* carrier, ie. sine wave or WGN) -> Sum 
-    
-    // FIR filter using DESIGNED_FIR_FILTER_COEFFICIENTS from FIR_coeff.hpp
-    // The filter will automatically use the coefficients you put in FIR_coeff.cpp
-    auto firFilter = std::make_unique<dsp::FIRFilter>(dsp::DESIGNED_FIR_FILTER_COEFFICIENTS);
-    // ===============================================================================================================
-    
-    /* DONE.TODO = Envelop detector
-       DONE. TODO = Envelop Modulator*/
-
-    /* ———————————————————————————————————————————————————————
-    / YY
-    / ORIGINAL: You had one DSPProcessor for all effects.
-    / dsp::DSPProcessor dspProcessor;
-    / dspProcessor.initialize(...);
-    / dspProcessor.addEffect(GainEffect);
-    / dspProcessor.addEffect(FIRFilter);
-    / dspProcessor.addEffect(EnvelopeDetector);
-    / dspProcessor.addEffect(EnvelopeModulator);
-    / dspProcessor.addEffect(SumEffect);
-    / ———————————————————————————————————————————————————————*/
-
-    // YY UPDATED: Split into two chains for clarity:
-  
-    // YY 1) dspModulator: just envelope detection + modulation
-    // YY Create a processing chain that only does envelope detection and modulation.
-    dsp::DSPProcessor dspModulator;
-    dspModulator.initialize(sampleRate, channels, framesPerBuffer);
-    dspModulator.addEffect(
-        std::make_unique<dsp::EnvelopeDetector>(0.005f, 0.1f));
-    dspModulator.addEffect(
-        std::make_unique<dsp::EnvelopeModulator>(440.0f, 0.8f));
-
-    // YY 2) dspFilter: gain + FIR filtering
-    // YY Create a processing chain that only does gain and fir filtering.
-    dsp::DSPProcessor dspFilter;
-    dspFilter.initialize(sampleRate, channels, framesPerBuffer);
-    // Optional: Move the gain here - using command line parameter
-    dspFilter.addEffect(
-        std::make_unique<dsp::GainEffect>(gainValue));
-    dspFilter.addEffect(
-        std::make_unique<dsp::FIRFilter>(dsp::DESIGNED_FIR_FILTER_COEFFICIENTS));
-
-    std::cout << "Vocoder Modulator initialized with 2 effects." << std::endl;
-    std::cout << "Filter Processor initialized with "
-        << dspFilter.getEffectCount() << " effects." << std::endl;//END YY
-   
-    //  TODO = Sum
-
-
-
-    std::cout << "FIR Filter initialized with " << firFilter->getFilterOrder() << " coefficients." << std::endl;
-
-    dspProcessor.addEffect(std::move(firFilter));
-    
-    std::cout << "DSP Processor initialized with " << dspProcessor.getEffectCount() << " effects." << std::endl;
-
+    // ---------- PortAudio ----------
+    if (Pa_Initialize() != paNoError) {
+        std::cerr << "PortAudio init failed\n"; return 1;
+    }//
     Microphone mic;
     Speaker speaker;
 
@@ -180,35 +102,70 @@ int main(int argc, char* argv[]) {
         mic.close();
         return 1;
     }
+   // ---------- DSP ----------
+    // Number of bands you want: 16 or 32, or more, depending on freq range
+    int numBands = 16;
+    // Use equal ratio or equal width distribution, and the following example uses logarithmic equal ratio.
+    double f_low = 100, f_high = 10000.0;
+    std::vector<double> edges(numBands + 1);
+    for (int i = 0; i <= numBands; ++i) {
+        edges[i] = f_low * std::pow(f_high / f_low, double(i) / numBands);
+    }
 
-    std::cout << "\n\nRT Vocoder is looping. Press Ctrl+C to terminate...\n" << std::endl;
-    
-    // YY UPDATED: main processing loop
-    try {
-        while (running) {
-            // 1) capture raw audio
-            auto raw = mic.capture(framesPerBuffer);
-            if (raw.empty()) continue;
+    // Prepare for each band Filter / Env / Mod
+    std::vector<dsp::FIRFilter>        filters;
+    std::vector<dsp::EnvelopeDetector> envs;
+    std::vector<dsp::EnvelopeModulator> mods;
+    /*-------------------------------------------------------------------------------------------
+    * WGN is not working here:
+    * If you want something that actually sounds like your own voice (even in a robotic way), 
+    * you’ll need to switch to a sinusoidal vocoder or a phase-vocoder approach—one that extracts 
+    * and re-synthesizes the voice’s fundamental frequency and harmonics, not just its envelope.
+    ----------------------------------------------------------------------------------------------*/
+    //std::vector<dsp::NoiseModulator>   mods;
 
-            // 2) envelope → modulation
-            auto modulated = dspModulator.process(raw);
+    // Even number, convolution length = order+1
+    int order = 96;
 
-            // 3) mix original + modulated
-            std::vector<float> mixed(raw.size());
-            for (size_t i = 0; i < raw.size(); ++i) {
-                mixed[i] = raw[i] + modulated[i];
-            }
+    for (int b = 0; b < numBands; ++b) {
+        // (1) BP coeff 
+        auto coeffs = designBandpassFIR(edges[b], edges[b + 1], order, sampleRate);
+        filters.emplace_back(coeffs);
+        // (2) Envelope detection
+        envs.emplace_back(0.010f, 0.02f);
+        // (3) Sinusoidal carrier: f0 in f_low, f_high logarithmic ratio division.
+        double cf = std::sqrt(edges[b] * edges[b + 1]);
+        mods.emplace_back(cf, 0.31f);
+        
+        // (3) white‐noise carrier (depth = 0.3)
+        //mods.emplace_back(0.3f);
 
-            // 4) post‑processing: gain + FIR
-            auto finalOut = dspFilter.process(mixed);
+        filters.back().initialize(sampleRate, channels, framesPerBuffer);
+        envs.back().initialize(sampleRate, channels, framesPerBuffer);
+        mods.back().initialize(sampleRate, channels, framesPerBuffer);
+    }
+    std::cout << "Single-band vocoder running...  Ctrl+C to stop.\n";
 
-            // 5) play to speaker
-            speaker.play(finalOut);
+    // ============ loop ============
+    while (running) {
+
+        auto raw = mic.capture(framesPerBuffer);
+        std::vector<float> mix(raw.size(), 0.0f);
+
+        for (int b = 0; b < numBands; ++b) {
+            auto band = filters[b].process(raw, sampleRate);
+            band = envs[b].process(band, sampleRate);
+            band = mods[b].process(band, sampleRate);//sine
+            //band = mods[b].process(band, sampleRate);//white noise
+            for (size_t i = 0; i < mix.size(); ++i)
+                mix[i] += band[i];
         }
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-    } // END YY
+        for (auto& s : mix)
+            s = std::clamp(s * 4.0f, -1.0f, 1.0f);
 
+        speaker.play(mix);
+    }
+    
     std::cout << "\nShutting down...\n" << std::endl;
     mic.close();
     speaker.close();

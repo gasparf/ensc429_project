@@ -12,9 +12,12 @@
 
 #include "dsp.hpp"
 #include "FIR_coeff.hpp"
+//#include "dsp/BANDPASS_coeff.hpp"
 #include <algorithm>
 #include <cmath>
 #include <sstream>
+#include <random>
+
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -199,14 +202,16 @@ void FIRFilter::initialize(int sampleRate, int channels, int framesPerBuffer) {
             // pick which channel state to update (interleaved data)
             float& state = envState_[i % chCount];
 
-            if (inAbs > state) {
+            /*if (inAbs > state) {
                 // rising edge: use faster attackCoeff_ to track up
                 state = attackCoeff_ * (state - inAbs) + inAbs;
             }
             else {
                 // output current envelope value
                 state = releaseCoeff_ * (state - inAbs) + inAbs;
-            }
+            }*/state += (inAbs - state) * (inAbs > state ?
+                (1.0f - attackCoeff_) : (1.0f - releaseCoeff_));
+
             output[i] = state;
         }
         return output;
@@ -252,6 +257,23 @@ void FIRFilter::initialize(int sampleRate, int channels, int framesPerBuffer) {
         }
         return output;
     }
+
+    // ---- wgn ----
+    NoiseModulator::NoiseModulator(float depth)
+        : depth_(depth), rng_(std::random_device{}()), dist_(0.0f, 1.0f) {
+    }
+
+    void NoiseModulator::initialize(int /*sr*/, int /*ch*/, int /*fpb*/) {
+        // nothing to pre-compute
+    }
+
+    std::vector<float> NoiseModulator::process(const std::vector<float>& env, int /*sr*/) {
+        std::vector<float> out(env.size());
+        for (size_t i = 0; i < env.size(); ++i)
+            out[i] = depth_ * env[i] * dist_(rng_);   // env × WGN
+        return out;
+    }
+
 
 //---------------------------
 // YY VocoderEffect
